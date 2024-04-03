@@ -15,7 +15,7 @@ namespace HotelListing.Data
         {
             IConfiguration configuration = new ConfigurationBuilder()
                   .SetBasePath(Directory.GetCurrentDirectory())
-                  .AddJsonFile(@".\HotelListing.WebAPI\appsettings.json")
+                  .AddJsonFile(@"F:\MyWork\API\HotelListing\HotelListing.WebAPI\appsettings.json")
                   .Build();
             DbContextOptionsBuilder<HotelListingDbcontext> optionsBuilder = new DbContextOptionsBuilder<HotelListingDbcontext>();
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));

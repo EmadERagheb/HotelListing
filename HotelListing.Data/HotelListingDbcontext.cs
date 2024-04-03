@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using HotelListing.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.Data
 {
@@ -8,5 +9,13 @@ namespace HotelListing.Data
         {
 
         }
+        public DbSet<Hotel> Hotels { get; set; }
+        public DbSet<Country> Countries { get; set; }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<string>().HaveMaxLength(200);
+        }
     }
+
 }
