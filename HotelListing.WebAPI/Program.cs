@@ -1,4 +1,6 @@
 
+using HotelListing.Data;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace HotelListing.WebAPI
@@ -17,12 +19,31 @@ namespace HotelListing.WebAPI
             builder.Services.AddSwaggerGen();
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", setup => 
+                options.AddPolicy("AllowAll", setup =>
                 setup.AllowAnyHeader()
                 .AllowAnyOrigin()
                 .AllowAnyMethod());
             });
-            builder.Host.UseSerilog((ctx,lc)=>lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
+
+            builder.Services.AddDbContext<HotelListingDbcontext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), setup =>
+                {
+                    setup.CommandTimeout(30);
+                    setup.EnableRetryOnFailure(maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                         errorNumbersToAdd: null);
+                })
+                .LogTo(Console.WriteLine, LogLevel.Information)
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                if (!builder.Environment.IsDevelopment())
+                {
+                    options.EnableDetailedErrors();
+                    options.EnableSensitiveDataLogging();
+                }
+
+            });
+            builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
 
             var app = builder.Build();
 
