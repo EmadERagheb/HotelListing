@@ -11,6 +11,11 @@ namespace HotelListing.Data
         }
         public DbSet<Hotel> Hotels { get; set; }
         public DbSet<Country> Countries { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Country>().HasData(CountryList.Countries);
+            modelBuilder.Entity<Hotel>().HasData(HotelList.Hotels);
+        }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
