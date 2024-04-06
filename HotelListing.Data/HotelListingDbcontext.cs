@@ -5,6 +5,8 @@ namespace HotelListing.Data
 {
     public class HotelListingDbcontext : DbContext
     {
+       
+        TimeZoneInfo TimeZoneInfo { get; set; } = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
         public HotelListingDbcontext(DbContextOptions<HotelListingDbcontext> options) : base(options)
         {
 
@@ -20,6 +22,24 @@ namespace HotelListing.Data
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties<string>().HaveMaxLength(200);
+        }
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+          
+            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo);
+            var entries=  ChangeTracker.Entries<BaseDomainModel>().Where(q => q.State == EntityState.Modified || q.State == EntityState.Added);
+            foreach (var entry in entries)
+            {
+                entry.Entity.UpdateBy = "Ereen";
+                entry.Entity.UpdatedDate = localTime;
+                if(entry.State== EntityState.Added)
+                {
+                    entry.Entity.CreatedBy = "Emad";
+                    entry.Entity.CreatedDate = localTime;
+                }
+
+            }
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 
