@@ -1,6 +1,9 @@
 
 using HotelListing.Data;
+using HotelListing.Domain;
 using HotelListing.WebAPI.Configurations;
+using HotelListing.WebAPI.Contracts;
+using HotelListing.WebAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -55,6 +58,11 @@ namespace HotelListing.WebAPI
 
             #region Build AutoMapper Service
             builder.Services.AddAutoMapper(typeof(MapperConfig));
+            #endregion
+
+            #region IOC
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<ICountriesRepository,CountriesRepository>();
             #endregion
 
             var app = builder.Build();
