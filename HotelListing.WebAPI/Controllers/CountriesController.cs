@@ -27,35 +27,42 @@ namespace HotelListing.WebAPI.Controllers
 
         // GET: api/Countries
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
+        public async Task<ActionResult<IEnumerable<GetCoutryDTO>>> GetCountries()
         {
-            return await _context.Countries.ToListAsync();
+
+            List<Country> coutries = await _context.Countries.ToListAsync();
+            var countriesDTO = _mapper.Map<List<GetCoutryDTO>>(coutries);
+            return Ok(countriesDTO);
+
         }
 
         // GET: api/Countries/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Country>> GetCountry(int id)
+        public async Task<ActionResult<CountryDTO>> GetCountry(int id)
         {
-            var country = await _context.Countries.FindAsync(id);
+            var country = await _context.Countries.Include(q=>q.Hotels).FirstOrDefaultAsync(q=>q.Id==id);
 
             if (country == null)
             {
                 return NotFound();
             }
 
-            return country;
+            var countryDTO = _mapper.Map<CountryDTO>(country);
+            return Ok(countryDTO);
         }
 
         // PUT: api/Countries/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCountry(int id, Country country)
+        public async Task<IActionResult> PutCountry(int id, UpdateCountryDTO updateCountryDTO)
         {
-            if (id != country.Id)
+            if (id != updateCountryDTO.Id)
             {
-                return BadRequest();
+                return BadRequest("Invalid Id");
             }
 
+            var country = await _context.Countries.FindAsync(id);
+            _mapper.Map(updateCountryDTO, country);
             _context.Entry(country).State = EntityState.Modified;
 
             try

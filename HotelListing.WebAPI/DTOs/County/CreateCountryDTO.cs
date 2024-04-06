@@ -1,14 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace HotelListing.WebAPI.DTOs.County
+﻿namespace HotelListing.WebAPI.DTOs.County
 {
-    public class CreateCountryDTO
+    public class CreateCountryDTO:CountryBaseDTO
     {
-        [Required]
-        public string Name { get; set; }
-
-        [Required]
-        public string ShortName { get; set; }
 
     }
 }
