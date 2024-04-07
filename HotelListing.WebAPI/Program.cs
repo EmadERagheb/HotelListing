@@ -1,5 +1,9 @@
 
 using HotelListing.Data;
+using HotelListing.Domain;
+using HotelListing.WebAPI.Configurations;
+using HotelListing.WebAPI.Contracts;
+using HotelListing.WebAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -17,33 +21,53 @@ namespace HotelListing.WebAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            #region Build CORS policy
             builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll", setup =>
-                setup.AllowAnyHeader()
-                .AllowAnyOrigin()
-                .AllowAnyMethod());
-            });
+           {
+               options.AddPolicy("AllowAll", setup =>
+               setup.AllowAnyHeader()
+               .AllowAnyOrigin()
+               .AllowAnyMethod());
+           });
+            #endregion
 
+            #region Build Context
             builder.Services.AddDbContext<HotelListingDbcontext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), setup =>
-                {
-                    setup.CommandTimeout(30);
-                    setup.EnableRetryOnFailure(maxRetryCount: 5,
-                        maxRetryDelay: TimeSpan.FromSeconds(5),
-                         errorNumbersToAdd: null);
-                })
-                .LogTo(Console.WriteLine, LogLevel.Information)
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-                if (!builder.Environment.IsDevelopment())
-                {
-                    options.EnableDetailedErrors();
-                    options.EnableSensitiveDataLogging();
-                }
+              {
+                  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), setup =>
+                  {
+                      setup.CommandTimeout(30);
+                      setup.EnableRetryOnFailure(maxRetryCount: 5,
+                          maxRetryDelay: TimeSpan.FromSeconds(5),
+                           errorNumbersToAdd: null);
+                  })
+                  .LogTo(Console.WriteLine, LogLevel.Information)
+                  .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                  if (!builder.Environment.IsDevelopment())
+                  {
+                      options.EnableDetailedErrors();
+                      options.EnableSensitiveDataLogging();
+                  }
 
-            });
+              });
+            #endregion
+
+            #region Build Logger
             builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
+            #endregion
+
+            #region Build AutoMapper Service
+            builder.Services.AddAutoMapper(typeof(MapperConfig));
+            #endregion
+
+            #region IOC
+
+            
+
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+
+            #endregion
 
             var app = builder.Build();
 
