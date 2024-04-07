@@ -1,6 +1,7 @@
 ﻿using HotelListing.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace HotelListing.Data
 {
@@ -19,8 +20,9 @@ namespace HotelListing.Data
             //Very Important
             //When we use IdentityDbcontexty We Must Include The Base OnmodelCreation
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Country>().HasData(CountryList.Countries);
-            modelBuilder.Entity<Hotel>().HasData(HotelList.Hotels);
+
+      
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
