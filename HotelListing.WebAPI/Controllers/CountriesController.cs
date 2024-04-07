@@ -2,7 +2,6 @@
 using HotelListing.Domain;
 using HotelListing.WebAPI.Contracts;
 using HotelListing.WebAPI.DTOs.County;
-using HotelListing.WebAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -103,7 +102,7 @@ namespace HotelListing.WebAPI.Controllers
                 return CreatedAtAction("GetCountry", new { id = country.Id }, country);
             }
             else
-                return BadRequest();
+                return BadRequest(ModelState);
 
 
         }
