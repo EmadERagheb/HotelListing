@@ -21,7 +21,6 @@ namespace HotelListing.Data.Migrations
                     { "8ae01be1-ab55-4d54-b04c-0ff3f48cb69a", null, "User", "USER" }
                 });
         }
-
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
