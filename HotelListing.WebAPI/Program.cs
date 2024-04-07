@@ -61,8 +61,12 @@ namespace HotelListing.WebAPI
             #endregion
 
             #region IOC
+
+            
+
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            builder.Services.AddScoped<ICountriesRepository,CountriesRepository>();
+            builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+
             #endregion
 
             var app = builder.Build();
