@@ -18,7 +18,7 @@ namespace HotelListing.WebAPI.Repositories
         public async Task<T> AddAsync(T entity)
         {
             await _context.AddAsync(entity);
-         await    _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return entity;
         }
 
@@ -28,26 +28,25 @@ namespace HotelListing.WebAPI.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> Exists(Expression<Func<T,bool>>filter)
+        public async Task<bool> Exists(Expression<Func<T, bool>> filter)
         {
             var entity = await GetAsync(filter);
             return entity is not null;
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>?> filter=null, params string[] properties)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>?> filter = null, params string[] properties)
         {
             IQueryable<T> query = _context.Set<T>();
-            if (filter != null)
+            if (filter is not null)
             {
                 query = query.Where(filter);
+            }
 
-                if (properties != null)
+            if (properties is not null)
+            {
+                foreach (var property in properties)
                 {
-                    foreach (var property in properties)
-                    {
-                        query.Include(property);
-
-                    }
+                    query = query.Include(property);
                 }
             }
             return await query.ToListAsync();
@@ -55,16 +54,16 @@ namespace HotelListing.WebAPI.Repositories
 
         public async Task<T> GetAsync(Expression<Func<T, bool>> filter, params string[] includedProperires)
         {
-            IQueryable<T> query = _context.Set<T>();
+            IQueryable<T> query = _context.Set<T>().Where(filter);
 
             if (includedProperires is not null)
             {
                 foreach (string property in includedProperires)
                 {
-                    query.Include(property);
+                    query = query.Include(property);
                 }
             }
-            return await _context.Set<T>().Where(filter).FirstOrDefaultAsync();
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task UpdateAsync(T entity)

@@ -2,12 +2,10 @@
 
 namespace HotelListing.WebAPI.DTOs.Hotal
 {
-    public class HotelDTO : HotelBaseDTO
+    public class CreateHotelDTO:HotelBaseDTO
     {
         [Required]
-        public int Id { get; set; }
-        [Required]
         public int CountryId { get; set; }
+
     }
 }
-
