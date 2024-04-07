@@ -4,6 +4,7 @@ using HotelListing.Domain;
 using HotelListing.WebAPI.Configurations;
 using HotelListing.WebAPI.Contracts;
 using HotelListing.WebAPI.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -31,7 +32,7 @@ namespace HotelListing.WebAPI
            });
             #endregion
 
-            #region Build Context
+            #region Build Context And Identity
             builder.Services.AddDbContext<HotelListingDbcontext>(options =>
               {
                   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), setup =>
@@ -50,6 +51,9 @@ namespace HotelListing.WebAPI
                   }
 
               });
+            builder.Services.AddIdentityCore<APIUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<HotelListingDbcontext>();
             #endregion
 
             #region Build Logger

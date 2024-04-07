@@ -1,9 +1,10 @@
 ﻿using HotelListing.Domain;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.Data
 {
-    public class HotelListingDbcontext : DbContext
+    public class HotelListingDbcontext :IdentityDbContext<APIUser>
     {
        
         TimeZoneInfo TimeZoneInfo { get; set; } = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
