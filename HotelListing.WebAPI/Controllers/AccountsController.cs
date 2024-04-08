@@ -52,10 +52,11 @@ namespace HotelListing.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> Login (LoginDTO loginDTO)
+        public async Task<ActionResult<AuthRespondDTO>> Login(LoginDTO loginDTO)
         {
-          var isvalid =   await  _authManger.IsLoged(loginDTO);
-            return isvalid ? Ok() : Unauthorized();
+            var respondDTO = await _authManger.IsLoged(loginDTO);
+            return respondDTO is not null ? Ok(respondDTO) : Unauthorized();
+
         }
     }
 }

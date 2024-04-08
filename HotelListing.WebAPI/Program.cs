@@ -73,7 +73,7 @@ namespace HotelListing.WebAPI
             builder.Services.AddScoped<IHotelRepository, HotelRepository>();
             builder.Services.AddScoped<IAuthManger, AuthManger>();
             #endregion
-
+            
             #region JWT
             builder.Services.AddAuthentication(options =>
             {
@@ -87,10 +87,11 @@ namespace HotelListing.WebAPI
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
+                
                 ClockSkew = TimeSpan.Zero,
                 ValidIssuer = builder.Configuration["JWTSettings:Issuer"],
                 ValidAudience = builder.Configuration["JWTSettings:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTSettings:Key"])
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWTSettings:Key"]))
 
             }
             );

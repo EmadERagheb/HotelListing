@@ -9,6 +9,8 @@ namespace HotelListing.WebAPI.Contracts
     {
         Task<IEnumerable<IdentityError>> Register(APIUser user);
 
-        Task<bool> IsLoged(LoginDTO loginDTO);
+        Task<AuthRespondDTO> IsLoged(LoginDTO loginDTO);
+
+        Task<string> GenerateToken(APIUser user);
     }
 }
