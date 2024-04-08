@@ -2,6 +2,7 @@
 using HotelListing.Domain;
 using HotelListing.WebAPI.Contracts;
 using HotelListing.WebAPI.DTOs.APIUser;
+using HotelListing.WebAPI.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,6 +45,17 @@ namespace HotelListing.WebAPI.Controllers
                 }
                 return BadRequest(ModelState);
             }
+        }
+
+        [HttpPost]
+        [Route("/Login")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> Login (LoginDTO loginDTO)
+        {
+          var isvalid =   await  _authManger.IsLoged(loginDTO);
+            return isvalid ? Ok() : Unauthorized();
         }
     }
 }

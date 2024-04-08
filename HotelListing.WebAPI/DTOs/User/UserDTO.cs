@@ -1,17 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HotelListing.WebAPI.DTOs.User;
+using System.ComponentModel.DataAnnotations;
 
 namespace HotelListing.WebAPI.DTOs.APIUser
 {
-    public class UserDTO
+    public class UserDTO:UserBaseDTO
     {
         [Required]
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
+      
     }
+
+
 }
