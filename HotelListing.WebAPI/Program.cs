@@ -68,6 +68,7 @@ namespace HotelListing.WebAPI
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
             builder.Services.AddScoped<IHotelRepository, HotelRepository>();
+            builder.Services.AddScoped<IAuthManger, AuthManger>();
             #endregion
 
             var app = builder.Build();
