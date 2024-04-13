@@ -56,7 +56,9 @@ namespace HotelListing.WebAPI
               });
             builder.Services.AddIdentityCore<APIUser>()
                 .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<HotelListingDbcontext>();
+                .AddTokenProvider<DataProtectorTokenProvider<APIUser>>(builder.Configuration["JWTSettings:Issuer"])
+                .AddEntityFrameworkStores<HotelListingDbcontext>()
+                .AddDefaultTokenProviders();
             #endregion
 
             #region Build Logger
