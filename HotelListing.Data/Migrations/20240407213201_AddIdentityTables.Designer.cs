@@ -4,6 +4,7 @@ using HotelListing.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelListing.Data.Migrations
 {
     [DbContext(typeof(HotelListingDbcontext))]
-    partial class HotelListingDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20240407213201_AddIdentityTables")]
+    partial class AddIdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,7 +141,7 @@ namespace HotelListing.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Countries", (string)null);
+                    b.ToTable("Countries");
 
                     b.HasData(
                         new
@@ -217,7 +220,7 @@ namespace HotelListing.Data.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("Hotels", (string)null);
+                    b.ToTable("Hotels");
 
                     b.HasData(
                         new
@@ -285,20 +288,6 @@ namespace HotelListing.Data.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "83cc3825-c940-4bf5-a3dc-f66a4818ed13",
-                            Name = "Administrator",
-                            NormalizedName = "ADMINISTRATOR"
-                        },
-                        new
-                        {
-                            Id = "8ae01be1-ab55-4d54-b04c-0ff3f48cb69a",
-                            Name = "User",
-                            NormalizedName = "USER"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
