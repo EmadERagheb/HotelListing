@@ -1,4 +1,3 @@
-using Asp.Versioning;
 using HotelListing.Data;
 using HotelListing.Domain;
 using HotelListing.WebAPI.Configurations;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
 
@@ -25,8 +25,41 @@ namespace HotelListing.WebAPI
 
             builder.Services.AddControllers().AddOData(option => option.Select().Filter().OrderBy());
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            #region Swagger Configurations
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Hotel Listing API", Version = "v1" });
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header using the Bearer scheme. 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      Example: 'Bearer 12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = JwtBearerDefaults.AuthenticationScheme
+                            },
+                            Scheme = "0auth2",
+                            Name = JwtBearerDefaults.AuthenticationScheme,
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>() 
+                    } 
+                });
+            });
+            #endregion
+
             #region Build CORS policy
             builder.Services.AddCors(options =>
            {
@@ -101,7 +134,7 @@ namespace HotelListing.WebAPI
             );
             #endregion
             #region API Versioning  Not Work right
-     
+
             //builder.Services.AddApiVersioning(setupAction =>
             //{
             //    setupAction.AssumeDefaultVersionWhenUnspecified = true;

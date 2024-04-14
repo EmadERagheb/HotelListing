@@ -39,6 +39,7 @@ namespace HotelListing.WebAPI.Controllers
             return Ok(countriesDTO);
         }    
         [HttpGet]
+        [Authorize]
         // GET: api/Countries/?PageNumber=5%PageSize=3
         public async Task<ActionResult<QueryResult<GetCoutryDTO>>> GetPagedCountries([FromQuery] QueryPerimeters query)
         {
@@ -63,7 +64,7 @@ namespace HotelListing.WebAPI.Controllers
         // PUT: api/Countries/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> PutCountry(int id, UpdateCountryDTO updateCountryDTO)
         {
             if (ModelState.IsValid)
