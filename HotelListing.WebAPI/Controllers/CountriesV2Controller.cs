@@ -8,17 +8,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.WebAPI.Controllers
+
 {
     [Route("api/v{version:apiVersion}/Countries")]
     [ApiController]
-    [ApiVersion("1.0",Deprecated =true)]
-    public class CountriesController : ControllerBase
+    [ApiVersion("2.0")]
+    public class CountriesV2Controller : ControllerBase
     {
 
         private readonly IMapper _mapper;
         private readonly ICountriesRepository _countriesRepository;
 
-        public CountriesController(IMapper mapper, ICountriesRepository countriesRepository)
+        public CountriesV2Controller(IMapper mapper, ICountriesRepository countriesRepository)
         {
 
             _mapper = mapper;
@@ -103,7 +104,7 @@ namespace HotelListing.WebAPI.Controllers
             if (ModelState.IsValid)
             {
                 var country = _mapper.Map<Country>(countryDTO);
-              country=  await _countriesRepository.AddAsync(country);
+                country = await _countriesRepository.AddAsync(country);
                 return CreatedAtAction("GetCountry", new { id = country.Id }, country);
             }
             else
@@ -117,7 +118,7 @@ namespace HotelListing.WebAPI.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteCountry(int id)
         {
-            var country = await _countriesRepository.GetAsync(q=>q.Id==id);
+            var country = await _countriesRepository.GetAsync(q => q.Id == id);
             if (country is null)
             {
                 return NotFound();
@@ -128,7 +129,7 @@ namespace HotelListing.WebAPI.Controllers
 
         private async Task<bool> CountryExists(int id)
         {
-            return await _countriesRepository.Exists(q=>q.Id==id);
+            return await _countriesRepository.Exists(q => q.Id == id);
         }
     }
 }

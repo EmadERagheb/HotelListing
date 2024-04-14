@@ -1,4 +1,4 @@
-
+using Asp.Versioning;
 using HotelListing.Data;
 using HotelListing.Domain;
 using HotelListing.WebAPI.Configurations;
@@ -75,7 +75,7 @@ namespace HotelListing.WebAPI
             builder.Services.AddScoped<IHotelRepository, HotelRepository>();
             builder.Services.AddScoped<IAuthManger, AuthManger>();
             #endregion
-            
+
             #region JWT
             builder.Services.AddAuthentication(options =>
             {
@@ -89,7 +89,7 @@ namespace HotelListing.WebAPI
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
-                
+
                 ClockSkew = TimeSpan.Zero,
                 ValidIssuer = builder.Configuration["JWTSettings:Issuer"],
                 ValidAudience = builder.Configuration["JWTSettings:Audience"],
@@ -97,8 +97,31 @@ namespace HotelListing.WebAPI
 
             }
             );
-
             #endregion
+            #region API Versioning Not Working
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddApiVersioning(setupAction =>
+            {
+                setupAction.AssumeDefaultVersionWhenUnspecified = true;
+                setupAction.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+                setupAction.ReportApiVersions = true;
+                setupAction.ApiVersionReader = ApiVersionReader.Combine(
+                    new QueryStringApiVersionReader("api-version"),
+                    new HeaderApiVersionReader("X-Version"),
+                    new MediaTypeApiVersionReader("ver")
+                    );
+            }).AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+            #endregion
+            //builder.Services.AddCascadingValue()
+
+
+
+
+
 
 
             var app = builder.Build();
