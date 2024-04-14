@@ -19,13 +19,13 @@ namespace HotelListing.WebAPI.Controllers
     public class CountriesController : ControllerBase
     {
 
-        private readonly IMapper _mapper;
+       
         private readonly ICountriesRepository _countriesRepository;
 
         public CountriesController(IMapper mapper, ICountriesRepository countriesRepository)
         {
 
-            _mapper = mapper;
+     
             _countriesRepository = countriesRepository;
         }
 
@@ -63,7 +63,7 @@ namespace HotelListing.WebAPI.Controllers
         // PUT: api/Countries/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> PutCountry(int id, UpdateCountryDTO updateCountryDTO)
         {
             if (ModelState.IsValid)
@@ -72,13 +72,10 @@ namespace HotelListing.WebAPI.Controllers
                 {
                     return BadRequest("Invalid Id");
                 }
-
-                var country = await _countriesRepository.GetAsync<Country>(q => q.Id == id);
-
-                _mapper.Map(updateCountryDTO, country);
                 try
                 {
-                    await _countriesRepository.UpdateAsync(country);
+                    if (await _countriesRepository.UpdateAsync(id, updateCountryDTO) == 0)
+                        return NotFound();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -100,7 +97,7 @@ namespace HotelListing.WebAPI.Controllers
         // POST: api/Countries
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<Country>> PostCountry(CreateCountryDTO countryDTO)
         {
             //var country = new Country()
@@ -110,8 +107,8 @@ namespace HotelListing.WebAPI.Controllers
             //};
             if (ModelState.IsValid)
             {
-                var country = _mapper.Map<Country>(countryDTO);
-              country=  await _countriesRepository.AddAsync(country);
+               
+            var  country=  await _countriesRepository.AddAsync<CreateCountryDTO, Country>(countryDTO);
                 return CreatedAtAction("GetCountry", new { id = country.Id }, country);
             }
             else

@@ -11,9 +11,9 @@ namespace HotelListing.WebAPI.Contracts
 
         Task<QueryResult<TResult>> GetAllAsync<TResult>(QueryPerimeters query);
 
-        Task<T> AddAsync(T entity);
+        Task<TResult> AddAsync<TSource,TResult>(TSource entity);
 
-        Task UpdateAsync(T entity);
+        Task<int> UpdateAsync<TSource>( int id,TSource source);
 
         Task DeleteAsync(T entity);
 

@@ -19,11 +19,13 @@ namespace HotelListing.WebAPI.Repositories
             _context = context;
             _mapper = mapper;
         }
-        public async Task<T> AddAsync(T entity)
+        public async Task<TResult> AddAsync<TSource, TResult>(TSource entity)
         {
-            await _context.AddAsync(entity);
+            T item = _mapper.Map<T>(entity);
+            await _context.AddAsync(item);
             await _context.SaveChangesAsync();
-            return entity;
+            return _mapper.Map<TResult>(item);
+
         }
 
         public async Task DeleteAsync(T entity)
@@ -58,20 +60,18 @@ namespace HotelListing.WebAPI.Repositories
 
         public async Task<QueryResult<TResult>> GetAllAsync<TResult>(QueryPerimeters queryPerimeters)
         {
-          
             return new QueryResult<TResult>()
             {
                 PageNumber = queryPerimeters.PageNumber,
-                Items = await _context.Set<T>().Skip(queryPerimeters.PageSize * (queryPerimeters.PageNumber-1))
+                Items = await _context.Set<T>().Skip(queryPerimeters.PageSize * (queryPerimeters.PageNumber - 1))
                    .Take(queryPerimeters.PageSize)
                    .ProjectTo<TResult>(_mapper.ConfigurationProvider)
                    .ToListAsync(),
                 TotalCount = await _context.Set<T>().CountAsync(),
-                RecordNumber=queryPerimeters.PageSize
-           
+                RecordNumber = queryPerimeters.PageSize
+
 
             };
-
         }
 
 
@@ -90,12 +90,19 @@ namespace HotelListing.WebAPI.Repositories
             return await query.ProjectTo<TResult>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
         }
 
-      
-
-        public async Task UpdateAsync(T entity)
+        public async Task<int> UpdateAsync<TSource>(int id, TSource source)
         {
-            _context.Update(entity);
-            await _context.SaveChangesAsync();
+            T entity = await _context.Set<T>().FindAsync(id);
+            if (entity is not null)
+            {
+                _mapper.Map(source, entity);
+                _context.Update(entity);
+                return await _context.SaveChangesAsync();
+
+            }
+            else
+                return 0;
+
         }
     }
 }
