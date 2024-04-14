@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using HotelListing.Domain;
 using HotelListing.WebAPI.Contracts;
 using HotelListing.WebAPI.DTOs.APIUser;
@@ -11,6 +12,7 @@ namespace HotelListing.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class AccountsController : ControllerBase
     {
         private readonly IAuthManger _authManger;

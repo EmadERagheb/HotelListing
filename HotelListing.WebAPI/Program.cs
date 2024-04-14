@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Serilog;
 using System.Text;
 
@@ -98,25 +99,31 @@ namespace HotelListing.WebAPI
             }
             );
             #endregion
-            #region API Versioning Not Working
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddApiVersioning(setupAction =>
+            #region API Versioning 
+     
+            //builder.Services.AddApiVersioning(setupAction =>
+            //{
+            //    setupAction.AssumeDefaultVersionWhenUnspecified = true;
+            //    setupAction.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+            //    setupAction.ReportApiVersions = true;
+            //    setupAction.ApiVersionReader = ApiVersionReader.Combine(
+            //        new QueryStringApiVersionReader("api-version"),
+            //        new HeaderApiVersionReader("X-Version"),
+            //        new MediaTypeApiVersionReader("ver")
+            //        );
+            //}).AddApiExplorer(options =>
+            //{
+            //    options.GroupNameFormat = "'v'VVV";
+            //    options.SubstituteApiVersionInUrl = true;
+            //});
+            #endregion
+            #region Add Cashing
+            builder.Services.AddResponseCaching(options =>
             {
-                setupAction.AssumeDefaultVersionWhenUnspecified = true;
-                setupAction.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
-                setupAction.ReportApiVersions = true;
-                setupAction.ApiVersionReader = ApiVersionReader.Combine(
-                    new QueryStringApiVersionReader("api-version"),
-                    new HeaderApiVersionReader("X-Version"),
-                    new MediaTypeApiVersionReader("ver")
-                    );
-            }).AddApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'VVV";
-                options.SubstituteApiVersionInUrl = true;
+                options.MaximumBodySize = 1024;
+                options.UseCaseSensitivePaths = true;
             });
             #endregion
-            //builder.Services.AddCascadingValue()
 
 
 
@@ -137,6 +144,19 @@ namespace HotelListing.WebAPI
 
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");
+            app.UseResponseCaching();
+            app.Use(async (context, next) =>
+            {
+                context.Response.GetTypedHeaders().CacheControl =
+                new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+                {
+                    Public = true,
+                    MaxAge = TimeSpan.FromSeconds(10),
+
+                };
+                context.Response.Headers[HeaderNames.Vary] = new string[] { "Accept-Encoding" };
+                await next();
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();
