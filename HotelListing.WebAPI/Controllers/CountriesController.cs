@@ -6,6 +6,7 @@ using HotelListing.WebAPI.DTOs.County;
 using HotelListing.WebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.WebAPI.Controllers
@@ -30,6 +31,7 @@ namespace HotelListing.WebAPI.Controllers
 
         // GET: api/Countries
         [HttpGet("GetAll")]
+        [EnableQuery]
         public async Task<ActionResult<IEnumerable<GetCoutryDTO>>> GetCountries()
         {
 

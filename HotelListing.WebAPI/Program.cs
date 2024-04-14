@@ -6,6 +6,7 @@ using HotelListing.WebAPI.Contracts;
 using HotelListing.WebAPI.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -22,7 +23,7 @@ namespace HotelListing.WebAPI
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddOData(option => option.Select().Filter().OrderBy());
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -99,7 +100,7 @@ namespace HotelListing.WebAPI
             }
             );
             #endregion
-            #region API Versioning 
+            #region API Versioning  Not Work right
      
             //builder.Services.AddApiVersioning(setupAction =>
             //{
