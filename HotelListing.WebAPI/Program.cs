@@ -1,4 +1,3 @@
-
 using HotelListing.Data;
 using HotelListing.Domain;
 using HotelListing.WebAPI.Configurations;
@@ -6,8 +5,11 @@ using HotelListing.WebAPI.Contracts;
 using HotelListing.WebAPI.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
 
@@ -21,10 +23,43 @@ namespace HotelListing.WebAPI
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddOData(option => option.Select().Filter().OrderBy());
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            #region Swagger Configurations
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Hotel Listing API", Version = "v1" });
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                {
+                    Description = @"JWT Authorization header using the Bearer scheme. 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      Example: 'Bearer 12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = JwtBearerDefaults.AuthenticationScheme
+                            },
+                            Scheme = "0auth2",
+                            Name = JwtBearerDefaults.AuthenticationScheme,
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>() 
+                    } 
+                });
+            });
+            #endregion
+
             #region Build CORS policy
             builder.Services.AddCors(options =>
            {
@@ -75,7 +110,7 @@ namespace HotelListing.WebAPI
             builder.Services.AddScoped<IHotelRepository, HotelRepository>();
             builder.Services.AddScoped<IAuthManger, AuthManger>();
             #endregion
-            
+
             #region JWT
             builder.Services.AddAuthentication(options =>
             {
@@ -89,7 +124,7 @@ namespace HotelListing.WebAPI
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
-                
+
                 ClockSkew = TimeSpan.Zero,
                 ValidIssuer = builder.Configuration["JWTSettings:Issuer"],
                 ValidAudience = builder.Configuration["JWTSettings:Audience"],
@@ -97,8 +132,37 @@ namespace HotelListing.WebAPI
 
             }
             );
-
             #endregion
+            #region API Versioning  Not Work right
+
+            //builder.Services.AddApiVersioning(setupAction =>
+            //{
+            //    setupAction.AssumeDefaultVersionWhenUnspecified = true;
+            //    setupAction.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+            //    setupAction.ReportApiVersions = true;
+            //    setupAction.ApiVersionReader = ApiVersionReader.Combine(
+            //        new QueryStringApiVersionReader("api-version"),
+            //        new HeaderApiVersionReader("X-Version"),
+            //        new MediaTypeApiVersionReader("ver")
+            //        );
+            //}).AddApiExplorer(options =>
+            //{
+            //    options.GroupNameFormat = "'v'VVV";
+            //    options.SubstituteApiVersionInUrl = true;
+            //});
+            #endregion
+            #region Add Cashing
+            builder.Services.AddResponseCaching(options =>
+            {
+                options.MaximumBodySize = 1024;
+                options.UseCaseSensitivePaths = true;
+            });
+            #endregion
+
+
+
+
+
 
 
             var app = builder.Build();
@@ -114,6 +178,19 @@ namespace HotelListing.WebAPI
 
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");
+            app.UseResponseCaching();
+            app.Use(async (context, next) =>
+            {
+                context.Response.GetTypedHeaders().CacheControl =
+                new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+                {
+                    Public = true,
+                    MaxAge = TimeSpan.FromSeconds(10),
+
+                };
+                context.Response.Headers[HeaderNames.Vary] = new string[] { "Accept-Encoding" };
+                await next();
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();

@@ -1,5 +1,8 @@
-﻿using HotelListing.Data;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using HotelListing.Data;
 using HotelListing.WebAPI.Contracts;
+using HotelListing.WebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -9,17 +12,20 @@ namespace HotelListing.WebAPI.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         private readonly HotelListingDbcontext _context;
+        private readonly IMapper _mapper;
 
-
-        public GenericRepository(HotelListingDbcontext context)
+        public GenericRepository(HotelListingDbcontext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-        public async Task<T> AddAsync(T entity)
+        public async Task<TResult> AddAsync<TSource, TResult>(TSource entity)
         {
-            await _context.AddAsync(entity);
+            T item = _mapper.Map<T>(entity);
+            await _context.AddAsync(item);
             await _context.SaveChangesAsync();
-            return entity;
+            return _mapper.Map<TResult>(item);
+
         }
 
         public async Task DeleteAsync(T entity)
@@ -30,11 +36,11 @@ namespace HotelListing.WebAPI.Repositories
 
         public async Task<bool> Exists(Expression<Func<T, bool>> filter)
         {
-            var entity = await GetAsync(filter);
+            var entity = await GetAsync<T>(filter);
             return entity is not null;
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>?> filter = null, params string[] properties)
+        public async Task<List<TResult>> GetAllAsync<TResult>(Expression<Func<T, bool>?> filter = null, params string[] properties)
         {
             IQueryable<T> query = _context.Set<T>();
             if (filter is not null)
@@ -49,10 +55,28 @@ namespace HotelListing.WebAPI.Repositories
                     query = query.Include(property);
                 }
             }
-            return await query.ToListAsync();
+            return await query.ProjectTo<TResult>(_mapper.ConfigurationProvider).ToListAsync();
         }
 
-        public async Task<T> GetAsync(Expression<Func<T, bool>> filter, params string[] includedProperires)
+        public async Task<QueryResult<TResult>> GetAllAsync<TResult>(QueryPerimeters queryPerimeters)
+        {
+            return new QueryResult<TResult>()
+            {
+                PageNumber = queryPerimeters.PageNumber,
+                Items = await _context.Set<T>().Skip(queryPerimeters.PageSize * (queryPerimeters.PageNumber - 1))
+                   .Take(queryPerimeters.PageSize)
+                   .ProjectTo<TResult>(_mapper.ConfigurationProvider)
+                   .ToListAsync(),
+                TotalCount = await _context.Set<T>().CountAsync(),
+                RecordNumber = queryPerimeters.PageSize
+
+
+            };
+        }
+
+
+
+        public async Task<TResult> GetAsync<TResult>(Expression<Func<T, bool>> filter, params string[] includedProperires)
         {
             IQueryable<T> query = _context.Set<T>().Where(filter);
 
@@ -63,13 +87,22 @@ namespace HotelListing.WebAPI.Repositories
                     query = query.Include(property);
                 }
             }
-            return await query.FirstOrDefaultAsync();
+            return await query.ProjectTo<TResult>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
         }
 
-        public async Task UpdateAsync(T entity)
+        public async Task<int> UpdateAsync<TSource>(int id, TSource source)
         {
-            _context.Update(entity);
-            await _context.SaveChangesAsync();
+            T entity = await _context.Set<T>().FindAsync(id);
+            if (entity is not null)
+            {
+                _mapper.Map(source, entity);
+                _context.Update(entity);
+                return await _context.SaveChangesAsync();
+
+            }
+            else
+                return 0;
+
         }
     }
 }

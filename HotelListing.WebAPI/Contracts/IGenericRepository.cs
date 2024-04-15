@@ -1,16 +1,19 @@
-﻿using System.Linq.Expressions;
+﻿using HotelListing.WebAPI.Models;
+using System.Linq.Expressions;
 
 namespace HotelListing.WebAPI.Contracts
 {
     public interface IGenericRepository<T> where T : class
     {
-        Task<T> GetAsync(Expression<Func<T,bool>> filter, params string[] properties);
+        Task<TResult> GetAsync<TResult>(Expression<Func<T,bool>> filter, params string[] properties);
 
-        Task<List<T>> GetAllAsync(Expression<Func<T, bool>?> filter=null, params string[] properties);
+        Task<List<TResult>> GetAllAsync<TResult>(Expression<Func<T, bool>?> filter=null, params string[] properties);
 
-        Task<T> AddAsync(T entity);
+        Task<QueryResult<TResult>> GetAllAsync<TResult>(QueryPerimeters query);
 
-        Task UpdateAsync(T entity);
+        Task<TResult> AddAsync<TSource,TResult>(TSource entity);
+
+        Task<int> UpdateAsync<TSource>( int id,TSource source);
 
         Task DeleteAsync(T entity);
 

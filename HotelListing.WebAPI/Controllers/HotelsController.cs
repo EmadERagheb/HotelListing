@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using HotelListing.Domain;
+﻿using HotelListing.Domain;
 using HotelListing.WebAPI.Contracts;
 using HotelListing.WebAPI.DTOs.Hotal;
+using HotelListing.WebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,39 +12,43 @@ namespace HotelListing.WebAPI.Controllers
     public class HotelsController : ControllerBase
     {
         private readonly IHotelRepository _hotelRepository;
-        private readonly IMapper _mapper;
 
-        public HotelsController(IHotelRepository hotelRepository, IMapper mapper)
+
+        public HotelsController(IHotelRepository hotelRepository)
         {
             _hotelRepository = hotelRepository;
-            _mapper = mapper;
+
         }
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<ActionResult<IEnumerable<GetHotelDTO>>> GetHotels()
         {
-            List<Hotel> hotels = await _hotelRepository.GetAllAsync();
-            List<GetHotelDTO> hotelDTOs = _mapper.Map<List<GetHotelDTO>>(hotels);
+            List<GetHotelDTO> hotelDTOs = await _hotelRepository.GetAllAsync<GetHotelDTO>();
             return Ok(hotelDTOs);
+        }
+        [HttpGet]
+        public async Task<ActionResult<QueryResult<GetHotelDTO>>> GetAllAsync([FromQuery] QueryPerimeters queryPrimeter)
+        {
+            var hotelPage = await _hotelRepository.GetAllAsync<GetHotelDTO>(queryPrimeter);
+            return Ok(hotelPage);
         }
         [HttpGet("{id}")]
 
         public async Task<ActionResult<GetDetailHotel>> GetHotel(int id)
         {
-            var Hotel = await _hotelRepository.GetAsync(q => q.Id == id, nameof(Domain.Hotel.Country));
-            if (Hotel is not null)
+            var hotelDTO = await _hotelRepository.GetAsync<GetDetailHotel>(q => q.Id == id, nameof(Domain.Hotel.Country));
+            if (hotelDTO is not null)
             {
-                var hotelDTO = _mapper.Map<GetDetailHotel>(Hotel);
                 return Ok(hotelDTO);
             }
             return NotFound();
         }
         [HttpPost]
-        public async Task<ActionResult> PostHotel(CreateHotelDTO hotelDTO)
+        public async Task<ActionResult<Hotel>> PostHotel(CreateHotelDTO hotelDTO)
         {
             if (ModelState.IsValid)
             {
-                var hotel = _mapper.Map<Hotel>(hotelDTO);
-                hotel = await _hotelRepository.AddAsync(hotel);
+
+                var hotel = await _hotelRepository.AddAsync<CreateHotelDTO, Hotel>(hotelDTO);
                 return CreatedAtAction(nameof(GetHotel), new { id = hotel.Id }, hotel);
             }
             return BadRequest(ModelState);
@@ -56,15 +60,13 @@ namespace HotelListing.WebAPI.Controllers
             {
                 return BadRequest("Invalid Id");
             }
-            var hotel = await _hotelRepository.GetAsync(q => q.Id == id);
-            if (hotel is null)
-            {
-                return NotFound();
-            }
-            _mapper.Map(hotelDTO, hotel);
             try
             {
-                await _hotelRepository.UpdateAsync(hotel);
+                if (await _hotelRepository.UpdateAsync(id, hotelDTO) == 0)
+                {
+                    return NotFound();
+                };
+                
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -83,7 +85,7 @@ namespace HotelListing.WebAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteHotel(int id)
         {
-            var hotel = await _hotelRepository.GetAsync(q => q.Id == id);
+            var hotel = await _hotelRepository.GetAsync<Hotel>(q => q.Id == id);
             if (hotel is null)
             {
                 return NotFound();
