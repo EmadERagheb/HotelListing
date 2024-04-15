@@ -158,13 +158,7 @@ namespace HotelListing.WebAPI
                 options.UseCaseSensitivePaths = true;
             });
             #endregion
-
-
-
-
-
-
-
+            builder.Services.AddHealthChecks();
             var app = builder.Build();
 
 
@@ -174,10 +168,12 @@ namespace HotelListing.WebAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.MapHealthChecks("/healthCheck");
             app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
             app.UseCors("AllowAll");
+
             app.UseResponseCaching();
             app.Use(async (context, next) =>
             {
